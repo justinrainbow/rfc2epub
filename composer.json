@@ -1,0 +1,7 @@
+{
+  "name": "justinrainbow/rfc2epub",
+  "description": "Converts a RFC (such as RFC 2616 http://www.w3.org/Protocols/rfc2616/rfc2616.txt) to an ePub",
+  "require": {
+    "justinrainbow/epub": "master-dev"
+  }
+}
