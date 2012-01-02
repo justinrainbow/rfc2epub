@@ -98,22 +98,21 @@ EOT
 		$package->manifest->add($toc);
 
 		foreach (new \RecursiveIteratorIterator($inputDir) as $file) {
-		  $item = new ManifestItem();
-		  $item->href = ltrim(str_replace($source, '', $file->getPathname()), '/');
-		  $item->type = 'application/xhtml+xml';
-		  $item->id   = $file->getBasename('.html');
-		  $item->setContent($this->repairSpecHTML(file_get_contents($file->getPathname())));
+			$item = new ManifestItem();
+			$item->href = ltrim(str_replace($source, '', $file->getPathname()), '/');
+			
+			// fix the filenames for sorting purposes
+			if (preg_match('/rfc(\d+)-sec(\d+)\.html/', $item->href, $match)) {
+				$item->href = sprintf('x-sec%04s.html', $match[2]);
+			}
 
-		  $package->manifest->add($item);
-		  $package->spine->add($item);
+			$item->type = 'application/xhtml+xml';
+			$item->id   = $file->getBasename('.html');
+			$item->setContent($this->repairSpecHTML(file_get_contents($file->getPathname())));
+
+			$package->manifest->add($item);
+			$package->spine->add($item);
 		}
-
-
-
-
-
-
-
 
 
 		$this->addFromString('mimetype', 'application/epub+zip');
@@ -152,6 +151,12 @@ EOT
 
 	private function repairSpecHTML($html)
 	{
+		// first pass is to update all rfc(\d+)-sec(\d+)\.html links to
+		// be have at least 2 digits in section number.
+		$html = preg_replace_callback('/rfc(\d+)-sec(\d+)\.html/m', function ($match) {
+			return sprintf('x-sec%04s.html', $match[2]);
+		}, $html);
+		
 	    $dom = new \DOMDocument();
 	    $dom->preserveWhiteSpace = false;
 	    $dom->formatOutput = true;
