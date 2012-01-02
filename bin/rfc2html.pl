@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/usr/bin/env perl
 # $Id: rfc2html.pl,v 1.15 2001/09/04 10:39:49 gerald Exp $
 #
 # OBSOLETE in favor of http://dev.w3.org/cvsweb/2001/rfc2html/

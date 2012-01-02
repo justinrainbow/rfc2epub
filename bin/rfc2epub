@@ -1,6 +1,7 @@
+#!/usr/bin/env php
 <?php
 
-require_once __DIR__.'/autoload.php';
+require_once __DIR__.'/../autoload.php';
 
 use ePub\Resource\Dumper\OpfResourceDumper;
 use ePub\Resource\Dumper\TocResourceDumper;
@@ -10,13 +11,24 @@ use ePub\Definition\Metadata;
 use ePub\Definition\ManifestItem;
 use ePub\Definition\MetadataItem;
 
-$outputDir = __DIR__.'/epub';
-$filename = __DIR__.'/http-spec.epub';
+
+if (count($argv) < 3) {
+	echo <<<USAGE
+Usage:
+		
+	{$argv[0]} [epub] [files]
+
+USAGE;
+	
+	exit(1);
+}
+
+
+$filename = realpath(dirname($argv[1])).'/'.basename($argv[1]); // use realpath because we need the absolute location
+$source   = realpath($argv[2]);
+$inputDir   = new RecursiveDirectoryIterator($source);
 $workingDir = sys_get_temp_dir() . uniqid('build-epub-');
 mkdir($workingDir);
-
-
-$files = glob(__DIR__.'/epub/*.html');
 
 
 function addFromString($path, $contents)
@@ -108,13 +120,13 @@ $toc->setContent(function () use ($package) {
 });
 $package->manifest->add($toc);
 
-foreach ($files as $file) {
+foreach (new RecursiveIteratorIterator($inputDir) as $file) {
   $item = new ManifestItem();
-  $item->href = str_replace(__DIR__.'/epub/', '', $file);
+  $item->href = ltrim(str_replace($source, '', $file->getPathname()), '/');
   $item->type = 'application/xhtml+xml';
-  $item->id   = basename($file, '.html');
+  $item->id   = $file->getBasename('.html');
   $item->setContent(function () use ($file) {
-	  return repairSpecHTML(file_get_contents($file));
+	  return repairSpecHTML(file_get_contents($file->getPathname()));
   });
 
   $package->manifest->add($item);

@@ -1,7 +1,13 @@
 {
   "name": "justinrainbow/rfc2epub",
   "description": "Converts a RFC (such as RFC 2616 http://www.w3.org/Protocols/rfc2616/rfc2616.txt) to an ePub",
+  "keywords": ["epub"],
+  "type": "library",
+  "license": "MIT",
   "require": {
+	"php": ">=5.3.0",
+	"ext-zip": "*",
     "justinrainbow/epub": "master-dev"
-  }
+  },
+  "bin": ["bin/rfc2epub", "bin/rfc2html.pl"]
 }
