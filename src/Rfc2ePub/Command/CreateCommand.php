@@ -23,6 +23,7 @@ use ePub\Definition\Manifest;
 use ePub\Definition\Metadata;
 use ePub\Definition\ManifestItem;
 use ePub\Definition\MetadataItem;
+use Rfc2ePub\Converter\Txt2HtmlConverter;
 
 /**
  * @author Justin Rainbow <justin.rainbow@gmail.com>
@@ -37,17 +38,13 @@ class CreateCommand extends Command
             ->setName('create')
             ->setDescription('Creates an ePub file from RFC HTML files.')
             ->setDefinition(array(
+				new InputArgument('input', InputArgument::REQUIRED, 'Directory containing the HTML files needed for ePub'),
 				new InputArgument('output', InputArgument::REQUIRED, 'Target location for the created ePub file.'),
-				new InputArgument('source', InputArgument::REQUIRED, 'Directory containing the HTML files needed for ePub'),
-                // new InputOption('dev', null, InputOption::VALUE_NONE, 'Forces installation from package sources when possible, including VCS information.'),
-                // new InputOption('dry-run', null, InputOption::VALUE_NONE, 'Outputs the operations but will not execute anything (implicitly enables --verbose).'),
-                // new InputOption('no-install-recommends', null, InputOption::VALUE_NONE, 'Do not install recommended packages.'),
-                // new InputOption('install-suggests', null, InputOption::VALUE_NONE, 'Also install suggested packages.'),
             ))
             ->setHelp(<<<EOT
 The <info>create</info> command builds a ePub file
 
-<info>rfc2epub create [output] [source]</info>
+<info>rfc2epub create [input] [output]</info>
 
 EOT
             )
@@ -56,15 +53,17 @@ EOT
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-		$output = $input->getArgument('output');
-		$source = $input->getArgument('source');
+		$destination = $input->getArgument('output');
 
 		// use realpath because we need the absolute location
-		$filename = realpath(dirname($output)).'/'.basename($output);
-		$inputDir   = new \RecursiveDirectoryIterator($source);
+		$filename = realpath(dirname($destination)).'/'.basename($destination);
 		$workingDir = sys_get_temp_dir() . uniqid('build-epub-');
 		mkdir($workingDir);
 
+		$converter = new Txt2HtmlConverter($input->getArgument('input'), $workingDir);
+		$converter->convert();
+		
+		$sourceFiles = $converter->getFiles();
 
 		$this->workingDir = $workingDir;
 
@@ -97,9 +96,9 @@ EOT
 		});
 		$package->manifest->add($toc);
 
-		foreach (new \RecursiveIteratorIterator($inputDir) as $file) {
+		foreach ($sourceFiles as $name => $file) {
 			$item = new ManifestItem();
-			$item->href = ltrim(str_replace($source, '', $file->getPathname()), '/');
+			$item->href = $name;
 			
 			// fix the filenames for sorting purposes
 			if (preg_match('/rfc(\d+)-sec(\d+)\.html/', $item->href, $match)) {
@@ -107,8 +106,10 @@ EOT
 			}
 
 			$item->type = 'application/xhtml+xml';
-			$item->id   = $file->getBasename('.html');
-			$item->setContent($this->repairSpecHTML(file_get_contents($file->getPathname())));
+			$item->id   = basename($file, '.html');
+			$item->setContent($this->repairSpecHTML(file_get_contents($file)));
+			
+			unlink($file);
 
 			$package->manifest->add($item);
 			$package->spine->add($item);
