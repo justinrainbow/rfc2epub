@@ -32,8 +32,8 @@ class Txt2HtmlConverter
 	{
 		$this->process->run();
 		
-		file_put_contents($this->outputDirectory.'/'.$this->tocName, $this->process->getOutput());
-		
+		// file_put_contents($this->outputDirectory.'/'.$this->tocName, $this->process->getOutput());
+
 		return true;
 	}
 	
