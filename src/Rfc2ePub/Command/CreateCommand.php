@@ -200,6 +200,17 @@ EOT
 				$previous->appendChild($tag);
 			}
 	    }
+		
+		// strip the first 6 spaces from each line in a <pre> tag
+		foreach ($dom->getElementsByTagName('pre') as $tag) {
+			$lines = explode("\n", $tag->nodeValue);
+			foreach ($lines as $i => $line) {
+				if (0 === strpos($line, '      ')) {
+					$lines[$i] = substr($line, 6);
+				}
+			}
+			$tag->nodeValue = implode("\n", $lines);
+		}
 
 	    $doc = new \DOMDocument('1.0');
 	    $doc->preserveWhitespace = false;

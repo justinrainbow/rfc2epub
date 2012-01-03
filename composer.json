@@ -8,11 +8,12 @@
 		"php": ">=5.3.0",
 		"ext-zip": "*",
 		"symfony/console": ">2.0,<2.2-dev",
+		"symfony/finder": ">2.0,<2.2-dev",
 		"symfony/process": ">2.0,<2.2-dev",
 		"justinrainbow/epub": "master-dev"
 	},
 	"autoload": {
 		"psr-0": { "Rfc2ePub": "src/" }
 	},
-	"bin": ["bin/rfc2epub", "bin/rfc2html.pl"]
+	"bin": ["bin/rfc2epub"]
 }
