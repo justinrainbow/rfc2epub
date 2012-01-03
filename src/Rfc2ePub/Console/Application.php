@@ -42,15 +42,15 @@ class Application extends BaseApplication
 
         return parent::doRun($input, $output);
     }
-	
-	public function locateResource($name)
-	{
-		$resources = __DIR__.'/../Resources';
-		
-		$file = $resources . '/' . $name;
-		
-		return $file;
-	}
+
+    public function locateResource($name)
+    {
+        $resources = __DIR__.'/../Resources';
+
+        $file = $resources . '/' . $name;
+
+        return $file;
+    }
 
     /**
      * Initializes all the composer commands
